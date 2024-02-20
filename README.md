@@ -1,3 +1,8 @@
 # Northcoders News API
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+## .env.test & .env.development setup
+
+    Running this code locally requires the creation of a .env.test and .env.development file to connect to the relevent databases
+
+- run touch .env.test & .env.development in terminal
+- add PGDATABASE=(relevent database name) to both files
