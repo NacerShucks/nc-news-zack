@@ -81,7 +81,7 @@ describe('GET /api/articles/:article_id', () => {
 
 });
 
-describe.only('GET /api/articles/:article_id/comments', () => {
+describe('GET /api/articles/:article_id/comments', () => {
     it('200: responds with an array of comments for the given article_id, ordered with most recent first of which each comment should have expected properties', () => {
         return request(app)
         .get('/api/articles/1/comments')
