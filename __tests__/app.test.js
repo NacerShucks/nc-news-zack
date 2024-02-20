@@ -42,23 +42,22 @@ describe('GET /api', () => {
 
 describe('GET /api/articles/:article_id', () => {
     it('200: responds with article object with correct properties', () => {
-        const testId = 1
+        const expectArticle = {
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: "2020-07-09T20:11:00.000Z",
+            votes: 100,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            }
         return request(app)
-        .get(`/api/articles/${testId}`)
+        .get(`/api/articles/1`)
         .expect(200)
         .then(({body}) => {
-            expect(Object.keys(body.article)).toHaveLength(8)
-            expect(Object.keys(body.article)).toContain(
-                'author',
-                'title', 
-                'article_id', 
-                'body', 
-                'topic', 
-                'created_at', 
-                'votes', 
-                'article_img_url'
-                )
-            expect(body.article.article_id).toBe(testId)
+            expect(body.article).toEqual(expectArticle)
         })
     });
     it('400: responds with a msg of Bad Request when requesting an invalid string in artices/id', () => {
