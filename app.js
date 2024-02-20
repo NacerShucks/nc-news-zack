@@ -13,6 +13,8 @@ app.get('/api', getEndpoints)
 
 app.get('/api/articles/:article_id', getArticle)
 
+app.get('/api/articles/:article_id/comments')
+
 app.all('/api/*', handleInvalidEndpoint)
 
 app.use(handlePSQLErrors)
