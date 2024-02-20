@@ -25,5 +25,21 @@
         }
       ]
     }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "adds comment to article",
+    "queries": [],
+    "requestBodyFormat": {
+      "username": "username",
+      "body": "text of the comment"},
+    "exampleResponse": {
+      "comment": {
+        "body": "text of the comment",
+        "votes": 0,
+        "author": "username",
+        "article_id": 9,
+        "created_at": 1584205320000
+      }
+    }
   }
 }

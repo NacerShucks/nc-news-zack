@@ -81,6 +81,79 @@ describe('GET /api/articles/:article_id', () => {
 
 });
 
+describe.only('POST /api/articles/:article_id/comments', () => {
+    it.only('201: responds with the posted comment when given valid request body', () => {
+        const startTime = new Date()
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+            body: "testBody"
+            
+        })
+        .expect(201)
+        .then(({body}) => {
+            console.log(body);
+            
+            expect(body.comment).toEqual({
+                body: 'testBody',
+                votes: 0,
+                author: 'butter_bridge',
+                article_id: 2,
+                created_at: '2024-02-20T22:39:17.583Z'
+            })
+        })
+    });
+    it('400: responds with Bad Request when provided too many fields', () => {
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+            body: "testBody"
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toEqual('Bad Request')
+        })
+    });
+    it('400: responds with Bad Request when provided too few fields', () => {
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+            body: "testBody"
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toEqual('Bad Request')
+        })
+    });
+    it('400: responds with Bad Request when one field has wrong name', () => {
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+            body: "testBody"
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toEqual('Bad Request')
+        })
+    });
+    it('400: responds with Bad Request when field has wrong value type', () => {
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+            body: "testBody"
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toEqual('Bad Request')
+        })
+    });
+});
+
 describe('GET /api/topics ERR HANDLING', () => {
     it('404: responds with not found msg when requested with invalid endpoint', () => {
         return request(app)
