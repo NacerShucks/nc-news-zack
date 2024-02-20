@@ -40,6 +40,48 @@ describe('GET /api', () => {
     });
 });
 
+describe('GET /api/articles/:article_id', () => {
+    it('200: responds with article object with correct properties', () => {
+        const testId = 1
+        return request(app)
+        .get(`/api/articles/${testId}`)
+        .expect(200)
+        .then(({body}) => {
+            expect(Object.keys(body.article)).toHaveLength(8)
+            expect(Object.keys(body.article)).toContain(
+                'author',
+                'title', 
+                'article_id', 
+                'body', 
+                'topic', 
+                'created_at', 
+                'votes', 
+                'article_img_url'
+                )
+            expect(body.article.article_id).toBe(testId)
+        })
+    });
+    it('400: responds with a msg of Bad Request when requesting an invalid string in artices/id', () => {
+        const testId = 'badId'
+        return request(app)
+        .get(`/api/articles/${testId}`)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Bad Request')
+        })
+    });
+    it('404: responds with a msg of Not Found when requesting a valid id that is not in db', () => {
+        const testId = 50
+        return request(app)
+        .get(`/api/articles/${testId}`)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe('Not Found')
+        })
+    });
+
+});
+
 describe('GET /api/topics ERR HANDLING', () => {
     it('404: responds with not found msg when requested with invalid endpoint', () => {
         return request(app)
