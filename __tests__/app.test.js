@@ -80,15 +80,13 @@ describe('GET /api/articles/:article_id', () => {
 });
 
 describe('GET /api/articles', () => {
-    it('200: responds with an articles array of article objects, each of which should have the expected properties', () => {
+    it('200: responds with an articles array of article objects, sorted by date, each of which should have the expected properties', () => {
         return request(app)
         .get('/api/articles')
         .expect(200)
         .then(({body}) => {
-            console.log(body);
             expect(body).toHaveLength(13)
             body.forEach((article) => {
-                console.log(article);
                 expect(Object.keys(article)).toContain('author') 
                 expect(Object.keys(article)).toContain('title') 
                 expect(Object.keys(article)).toContain('article_id') 
@@ -99,11 +97,12 @@ describe('GET /api/articles', () => {
                 expect(Object.keys(article)).toContain('comment_count') 
                 expect(Object.keys(article)).not.toContain('body')               
             })
+            expect(body).toBeSortedBy('created_at', {descending: true})
         })
     });
 });
 
-describe('GET /api/topics ERR HANDLING', () => {
+describe('ERR HANDLING', () => {
     it('404: responds with not found msg when requested with invalid endpoint', () => {
         return request(app)
         .get('/api/topics/nonsense')
