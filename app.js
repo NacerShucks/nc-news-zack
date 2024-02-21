@@ -4,12 +4,13 @@ const { getTopics } = require('./controllers/topics.controller')
 const { handleInvalidEndpoint, handleInternalServerError, handlePSQLErrors, handleCustomErrors } = require('./controllers/errors.controller')
 const { getEndpoints } = require('./controllers/endpoints.controller')
 const { getArticles, getArticleById } = require('./controllers/articles.controller')
-
-
+const { getCommentsByArticleId } = require('./controllers/comments.controller')
 
 app.get('/api/topics', getTopics)
 
 app.get('/api', getEndpoints)
+
+app.get('/api/articles/:article_id/comments', getCommentsByArticleId)
 
 app.get('/api/articles/', getArticles)
 

@@ -79,6 +79,94 @@ describe('GET /api/articles/:article_id', () => {
 
 });
 
+describe('GET /api/articles/:article_id/comments', () => {
+    it('200: responds with an array of comments for the given article_id, ordered with most recent first of which each comment should have expected properties', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(11)
+            body.comments.forEach((comment) => {
+                expect(Object.keys(comment)).toContain('comment_id')
+                expect(Object.keys(comment)).toContain('votes')
+                expect(Object.keys(comment)).toContain('created_at')
+                expect(Object.keys(comment)).toContain('author')
+                expect(Object.keys(comment)).toContain('body')
+                expect(Object.keys(comment)).toContain('article_id')
+            })
+            expect(body.comments).toBeSortedBy('created_at', {descending: true})
+        })
+    });
+    it('200: responds with an empty array when given article id for artical with no comments', () => {
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(0)
+        })
+    });
+    it('404: responds with msg of Not Found when given article id that refrences no article', () => {
+        return request(app)
+        .get('/api/articles/600/comments')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe('Not Found')
+        })
+    });
+    it('400: responds with msg of Bad Request when given invalid data in place of article id', () => {
+        return request(app)
+        .get('/api/articles/invaliddata/comments')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Bad Request')
+        })
+    });
+});
+
+describe('GET /api/articles/:article_id/comments', () => {
+    it('200: responds with an array of comments for the given article_id, ordered with most recent first of which each comment should have expected properties', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(11)
+            body.comments.forEach((comment) => {
+                expect(Object.keys(comment)).toContain('comment_id')
+                expect(Object.keys(comment)).toContain('votes')
+                expect(Object.keys(comment)).toContain('created_at')
+                expect(Object.keys(comment)).toContain('author')
+                expect(Object.keys(comment)).toContain('body')
+                expect(Object.keys(comment)).toContain('article_id')
+            })
+            expect(body.comments).toBeSortedBy('created_at', {descending: true})
+        })
+    });
+    it('200: responds with an empty array when given article id for artical with no comments', () => {
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(0)
+        })
+    });
+    it('404: responds with msg of Not Found when given article id that refrences no article', () => {
+        return request(app)
+        .get('/api/articles/600/comments')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe('Not Found')
+        })
+    });
+    it('400: responds with msg of Bad Request when given invalid data in place of article id', () => {
+        return request(app)
+        .get('/api/articles/invaliddata/comments')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Bad Request')
+        })
+    })
+})
+
 describe('GET /api/articles', () => {
     it('200: responds with an articles array of article objects, sorted by date, each of which should have the expected properties', () => {
         return request(app)
@@ -99,7 +187,6 @@ describe('GET /api/articles', () => {
             })
             expect(body).toBeSortedBy('created_at', {descending: true})
             expect(body[0].comment_count).toBe("2")
-            console.log(body[0]);
         })
     });
 });
