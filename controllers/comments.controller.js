@@ -1,5 +1,5 @@
-const { selectArticleById } = require("../modules/articles.modules")
-const { requestComments } = require("../modules/comments.modules")
+const { selectArticleById } = require("../models/articles.models")
+const { requestComments } = require("../models/comments.models")
 
 exports.getCommentsByArticleId = (req, res, next) => {
 

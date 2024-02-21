@@ -163,7 +163,6 @@ describe('GET /api/articles/:article_id/comments', () => {
         .expect(400)
         .then(({body}) => {
             expect(body.msg).toBe('Bad Request')
-
         })
     })
 })
@@ -188,7 +187,6 @@ describe('GET /api/articles', () => {
             })
             expect(body).toBeSortedBy('created_at', {descending: true})
             expect(body[0].comment_count).toBe("2")
-            console.log(body[0]);
         })
     });
 });
