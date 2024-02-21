@@ -2,7 +2,7 @@ const db = require('../db/connection.js')
 const format = require('pg-format')
 
 exports.selectArticleById = (id) => {
-    const queryString = 'SELECT * FROM articles WHERE article_id=$1'
+    const queryString = `SELECT * FROM articles WHERE article_id=$1`
     return db.query(queryString, [id])
     .then(({rows}) => {
         if(rows.length === 0){
