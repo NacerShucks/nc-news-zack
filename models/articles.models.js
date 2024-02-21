@@ -12,8 +12,12 @@ exports.selectArticleById = (id) => {
     })
 }
 
-exports.selectArticles = () => {
-    const queryString = `SELECT articles.author, 
+exports.selectArticles = ({topic}) => {
+    let topicString = ''
+    if(topic){
+        topicString = 'WHERE articles.topic = %L'
+    }
+    const queryString = format(`SELECT articles.author, 
                                 title,
                                 articles.article_id, 
                                 topic, 
@@ -21,13 +25,18 @@ exports.selectArticles = () => {
                                 articles.votes,
                                 article_img_url,
                                 COUNT(comments.article_id) AS comment_count
-                                FROM articles
+                                FROM articles                  
                                 LEFT JOIN comments 
                                 ON articles.article_id = comments.article_id 
+                                ${topicString}
                                 GROUP BY articles.article_id
-                                ORDER BY articles.created_at DESC`
+                                ORDER BY articles.created_at DESC`,
+                                topic)
     return db.query(queryString)
     .then(({rows}) => {
+        if(rows.length === 0){
+            return Promise.reject({status: 404, msg: "Not Found"})
+        }
         return rows
     })
 }

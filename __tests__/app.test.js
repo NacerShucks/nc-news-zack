@@ -406,3 +406,26 @@ describe('GET /api/users', () => {
         })
     });
 });
+
+describe('GET /api/articles?topic', () => {
+    it('200: when queried with topic returns only articles of specified topic', () => {
+        return request(app)
+        .get('/api/articles?topic=mitch')
+        .expect(200)
+        .then(({body}) => {
+            body.forEach((article) => {
+                expect(Object.keys(article).length).toBe(8)
+                expect(article.topic).toBe("mitch");
+            })
+        });
+    });
+    it('when queried with a topic that matches nothing then return 404 error', () => {
+        return request(app)
+        .get('/api/articles?topic=invalid')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("Not Found")
+        })
+    });
+});
+
