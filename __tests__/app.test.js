@@ -23,7 +23,8 @@ describe('GET /api/topics', () => {
             expect(body.topics.length).toBe(3)
             body.topics.forEach((topic) => {
                 expect(Object.keys(topic).length).toBe(2)
-                expect(Object.keys(topic)).toContain('description', 'slug')
+                expect(Object.keys(topic)).toContain('description')
+                expect(Object.keys(topic)).toContain('slug')
             })
         })
     });
@@ -386,5 +387,22 @@ describe('DELETE /api/comments/:comment_id', () => {
         return request(app)
         .delete('/api/comments/2423423423423')
         .expect(400)
+    });
+});
+
+describe('GET /api/users', () => {
+    it('200: returns user array of expected length', () => {
+        return request(app)
+        .get('/api/users')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.users.length).toBe(4)
+            body.users.forEach((user) => {
+                expect(Object.keys(user).length).toBe(3)
+                expect(Object.keys(user)).toContain('username')
+                expect(Object.keys(user)).toContain('name')
+                expect(Object.keys(user)).toContain('avatar_url')
+            })
+        })
     });
 });
