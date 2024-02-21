@@ -4,6 +4,7 @@ const db = require('../db/connection.js')
 const data = require('../db/data/test-data/index.js')
 const seed = require('../db/seeds/seed.js')
 const endpoints = require('../endpoints.json')
+const {convertTimestampToDate} = require('../db/seeds/utils.js')
 
 beforeEach(() => {
     return seed(data)
@@ -61,18 +62,16 @@ describe('GET /api/articles/:article_id', () => {
         })
     });
     it('400: responds with a msg of Bad Request when requesting an invalid string in artices/id', () => {
-        const testId = 'badId'
         return request(app)
-        .get(`/api/articles/${testId}`)
+        .get(`/api/articles/badId`)
         .expect(400)
         .then(({body}) => {
             expect(body.msg).toBe('Bad Request')
         })
     });
     it('404: responds with a msg of Not Found when requesting a valid id that is not in db', () => {
-        const testId = 50
         return request(app)
-        .get(`/api/articles/${testId}`)
+        .get(`/api/articles/50`)
         .expect(404)
         .then(({body}) => {
             expect(body.msg).toBe('Not Found')
@@ -81,9 +80,55 @@ describe('GET /api/articles/:article_id', () => {
 
 });
 
-describe.only('POST /api/articles/:article_id/comments', () => {
-    it.only('201: responds with the posted comment when given valid request body', () => {
-        const startTime = new Date()
+describe('GET /api/articles/:article_id/comments', () => {
+    it('200: responds with an array of comments for the given article_id, ordered with most recent first of which each comment should have expected properties', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(11)
+            body.comments.forEach((comment) => {
+                expect(Object.keys(comment)).toContain('comment_id')
+                expect(Object.keys(comment)).toContain('votes')
+                expect(Object.keys(comment)).toContain('created_at')
+                expect(Object.keys(comment)).toContain('author')
+                expect(Object.keys(comment)).toContain('body')
+                expect(Object.keys(comment)).toContain('article_id')
+            })
+            expect(body.comments).toBeSortedBy('created_at', {descending: true})
+        })
+    });
+    it('200: responds with an empty array when given article id for artical with no comments', () => {
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(0)
+        })
+    });
+    it('404: responds with msg of Not Found when given article id that refrences no article', () => {
+        return request(app)
+        .get('/api/articles/600/comments')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe('Not Found')
+        })
+    });
+    it('400: responds with msg of Bad Request when given invalid data in place of article id', () => {
+        return request(app)
+        .get('/api/articles/invaliddata/comments')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Bad Request')
+
+        })
+    });
+});
+
+describe('POST /api/articles/:article_id/comments', () => {
+    it('201: responds with the posted comment when given valid request body', () => {
+        const before = Date.now()
+
         return request(app)
         .post('/api/articles/2/comments')
         .send({
@@ -93,27 +138,40 @@ describe.only('POST /api/articles/:article_id/comments', () => {
         })
         .expect(201)
         .then(({body}) => {
-            console.log(body);
-            
+            const after = Date.now()
+            expect(Date.parse(body.comment.created_at)).toBeGreaterThan(before)
+            expect(Date.parse(body.comment.created_at)).toBeLessThan(after)
             expect(body.comment).toEqual({
                 body: 'testBody',
                 votes: 0,
                 author: 'butter_bridge',
                 article_id: 2,
-                created_at: '2024-02-20T22:39:17.583Z'
+                created_at: body.comment.created_at
             })
+            
         })
     });
-    it('400: responds with Bad Request when provided too many fields', () => {
+    it('201: when given extra fields responds with posted comment with extra feilds removed', () => {
+        const before = Date.now()
         return request(app)
         .post('/api/articles/2/comments')
         .send({
             username: "butter_bridge",
-            body: "testBody"
+            body: "testBody",
+            complements: "wow what a well made back end"
         })
-        .expect(400)
+        .expect(201)
         .then(({body}) => {
-            expect(body.msg).toEqual('Bad Request')
+            const after = Date.now()
+            expect(Date.parse(body.comment.created_at)).toBeGreaterThan(before)
+            expect(Date.parse(body.comment.created_at)).toBeLessThan(after)
+            expect(body.comment).toEqual({
+                body: 'testBody',
+                votes: 0,
+                author: 'butter_bridge',
+                article_id: 2,
+                created_at: body.comment.created_at
+            })
         })
     });
     it('400: responds with Bad Request when provided too few fields', () => {
@@ -121,7 +179,6 @@ describe.only('POST /api/articles/:article_id/comments', () => {
         .post('/api/articles/2/comments')
         .send({
             username: "butter_bridge",
-            body: "testBody"
         })
         .expect(400)
         .then(({body}) => {
@@ -133,7 +190,7 @@ describe.only('POST /api/articles/:article_id/comments', () => {
         .post('/api/articles/2/comments')
         .send({
             username: "butter_bridge",
-            body: "testBody"
+            bodyodyody: "testBody"
         })
         .expect(400)
         .then(({body}) => {
@@ -145,16 +202,96 @@ describe.only('POST /api/articles/:article_id/comments', () => {
         .post('/api/articles/2/comments')
         .send({
             username: "butter_bridge",
-            body: "testBody"
+            body: []
         })
         .expect(400)
         .then(({body}) => {
             expect(body.msg).toEqual('Bad Request')
         })
+    })
+    it('404: responds with Not Found when passed an article id that refrences no article', () => {
+        return request(app)
+        .post('/api/articles/500/comments')
+        .send({
+            username: "butter_bridge",
+            body: "testBody"
+        })
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toEqual('Not Found')
+        })
+    });
+})
+    
+describe('GET /api/articles/:article_id/comments', () => {
+    it('200: responds with an array of comments for the given article_id, ordered with most recent first of which each comment should have expected properties', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(11)
+            body.comments.forEach((comment) => {
+                expect(Object.keys(comment)).toContain('comment_id')
+                expect(Object.keys(comment)).toContain('votes')
+                expect(Object.keys(comment)).toContain('created_at')
+                expect(Object.keys(comment)).toContain('author')
+                expect(Object.keys(comment)).toContain('body')
+                expect(Object.keys(comment)).toContain('article_id')
+            })
+            expect(body.comments).toBeSortedBy('created_at', {descending: true})
+        })
+    });
+    it('200: responds with an empty array when given article id for artical with no comments', () => {
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(0)
+        })
+    });
+    it('404: responds with msg of Not Found when given article id that refrences no article', () => {
+        return request(app)
+        .get('/api/articles/600/comments')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe('Not Found')
+        })
+    });
+    it('400: responds with msg of Bad Request when given invalid data in place of article id', () => {
+        return request(app)
+        .get('/api/articles/invaliddata/comments')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Bad Request')
+        })
+    })
+})
+
+describe('GET /api/articles', () => {
+    it('200: responds with an articles array of article objects, sorted by date, each of which should have the expected properties', () => {
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toHaveLength(13)
+            body.forEach((article) => {
+                expect(Object.keys(article)).toContain('author') 
+                expect(Object.keys(article)).toContain('title') 
+                expect(Object.keys(article)).toContain('article_id') 
+                expect(Object.keys(article)).toContain('topic') 
+                expect(Object.keys(article)).toContain('created_at') 
+                expect(Object.keys(article)).toContain('article_img_url') 
+                expect(Object.keys(article)).toContain('votes') 
+                expect(Object.keys(article)).toContain('comment_count') 
+                expect(Object.keys(article)).not.toContain('body')               
+            })
+            expect(body).toBeSortedBy('created_at', {descending: true})
+            expect(body[0].comment_count).toBe("2")
+        })
     });
 });
 
-describe('GET /api/topics ERR HANDLING', () => {
+describe('ERR HANDLING', () => {
     it('404: responds with not found msg when requested with invalid endpoint', () => {
         return request(app)
         .get('/api/topics/nonsense')

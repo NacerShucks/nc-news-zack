@@ -1,7 +1,21 @@
 const db = require('../db/connection.js')
 const format = require('pg-format');
+const { convertTimestampToDate } = require('../db/seeds/utils.js');
+
+exports.requestComments = (articleID) => {
+    const queryString = format(
+        `SELECT * 
+        FROM comments 
+        WHERE comments.article_id = %L
+        ORDER BY created_at DESC`, articleID)
+    return db.query(queryString)
+    .then((result) => {
+        return result.rows
+    })
+}
 
 exports.insertComment = (comment, article_id) => {
+
     const commentClone = {
         author: comment.username,
         body: comment.body,
@@ -24,14 +38,15 @@ exports.insertComment = (comment, article_id) => {
         commentKeys,
         commentArr
     )
-    console.log(queryString);
     return db.query(queryString)
     .then((result) => {
-        return result.rows[0]
+        return convertTimestampToDate(result.rows[0])
     })
     .catch((err) => {
-        console.log(err);
-        return Promise.reject({status: 400, msg: "bad request"});
+        if(err.code === '23503'){
+            return Promise.reject({status: 404, msg: "Not Found"});
+        }
+        return Promise.reject({status: 400, msg: "Bad Request"});
     })
     
 }
