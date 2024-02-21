@@ -61,18 +61,16 @@ describe('GET /api/articles/:article_id', () => {
         })
     });
     it('400: responds with a msg of Bad Request when requesting an invalid string in artices/id', () => {
-        const testId = 'badId'
         return request(app)
-        .get(`/api/articles/${testId}`)
+        .get(`/api/articles/badId`)
         .expect(400)
         .then(({body}) => {
             expect(body.msg).toBe('Bad Request')
         })
     });
     it('404: responds with a msg of Not Found when requesting a valid id that is not in db', () => {
-        const testId = 50
         return request(app)
-        .get(`/api/articles/${testId}`)
+        .get(`/api/articles/50`)
         .expect(404)
         .then(({body}) => {
             expect(body.msg).toBe('Not Found')
@@ -81,7 +79,32 @@ describe('GET /api/articles/:article_id', () => {
 
 });
 
-describe('GET /api/topics ERR HANDLING', () => {
+describe('GET /api/articles', () => {
+    it('200: responds with an articles array of article objects, sorted by date, each of which should have the expected properties', () => {
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toHaveLength(13)
+            body.forEach((article) => {
+                expect(Object.keys(article)).toContain('author') 
+                expect(Object.keys(article)).toContain('title') 
+                expect(Object.keys(article)).toContain('article_id') 
+                expect(Object.keys(article)).toContain('topic') 
+                expect(Object.keys(article)).toContain('created_at') 
+                expect(Object.keys(article)).toContain('article_img_url') 
+                expect(Object.keys(article)).toContain('votes') 
+                expect(Object.keys(article)).toContain('comment_count') 
+                expect(Object.keys(article)).not.toContain('body')               
+            })
+            expect(body).toBeSortedBy('created_at', {descending: true})
+            expect(body[0].comment_count).toBe("2")
+            console.log(body[0]);
+        })
+    });
+});
+
+describe('ERR HANDLING', () => {
     it('404: responds with not found msg when requested with invalid endpoint', () => {
         return request(app)
         .get('/api/topics/nonsense')
