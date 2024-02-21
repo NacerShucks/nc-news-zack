@@ -9,7 +9,7 @@ exports.handleInternalServerError = (err, req, res, next) => {
 }
 
 exports.handlePSQLErrors = (err, req, res, next) => {
-    if(err.code === '22P02'){
+    if(err.code === '22P02' || err.code === '22003'){
         res.status(400).send({msg: 'Bad Request'})
     }
     next(err)

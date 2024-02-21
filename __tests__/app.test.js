@@ -365,3 +365,26 @@ describe('PATCH /api/articles/:article_id', () => {
         })
     });
 });
+
+describe('DELETE /api/comments/:comment_id', () => {
+    it('201: responds with 201', () => {
+        return request(app)
+        .delete('/api/comments/1')
+        .expect(201)
+    });
+    it('404: returns error when queried with valid int not present in db', () => {
+        return request(app)
+        .delete('/api/comments/5345')
+        .expect(404)
+    });
+    it('400: returns error when queried with string', () => {
+        return request(app)
+        .delete('/api/comments/sdawid')
+        .expect(400)
+    });
+    it('400: returns error when queried with number out of range for int', () => {
+        return request(app)
+        .delete('/api/comments/2423423423423')
+        .expect(400)
+    });
+});
