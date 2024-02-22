@@ -7,3 +7,4 @@ exports.selectTopics = () => {
         return results.rows
     })
 }
+

@@ -2,6 +2,7 @@ const db = require('../db/connection.js')
 const format = require('pg-format')
 
 exports.selectArticleById = (id) => {
+    const articleId = Number(id.article_id)
     const queryString = `SELECT articles.author, 
                         title,
                         articles.body,
@@ -15,21 +16,32 @@ exports.selectArticleById = (id) => {
                         LEFT JOIN comments 
                         ON articles.article_id = comments.article_id 
                         WHERE articles.article_id=$1
-                        GROUP BY articles.article_id`
-    return db.query(queryString, [id])
+                        GROUP BY articles.article_id`  
+    return db.query(queryString, [articleId])
     .then(({rows}) => {
-        if(rows.length === 0){
-            return Promise.reject({status: 404, msg: 'Not Found'})
-        }
-        return rows[0]
+        if(rows[0] === undefined){
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        } 
+        return rows
     })
 }
 
-exports.selectArticles = ({topic}) => {
+exports.selectArticles = ({topic}, topics) => {
+    const realTopic = []
     let topicString = ''
     if(topic){
-        topicString = 'WHERE articles.topic = %L'
+        topics.forEach(({slug}) => {
+            if( slug === topic ){
+                realTopic.push(slug)
+            }
+        })
+        if(realTopic[0] !== undefined){
+            topicString = 'WHERE articles.topic = %L'
+        }else{
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        }
     }
+    
     const queryString = format(`SELECT articles.author, 
                                 title,
                                 articles.article_id, 
@@ -44,34 +56,29 @@ exports.selectArticles = ({topic}) => {
                                 ${topicString}
                                 GROUP BY articles.article_id
                                 ORDER BY articles.created_at DESC`,
-                                topic)
+                                realTopic[0])
     return db.query(queryString)
     .then(({rows}) => {
-        if(rows.length === 0){
-            return Promise.reject({status: 404, msg: "Not Found"})
-        }
+        
         return rows
     })
 }
 
-exports.updateArticle = (articleId, updateBody) => {
-    if(typeof updateBody.inc_votes !== 'number' || !Object.keys(updateBody).includes('inc_votes')){
-        return Promise.reject({status: 400, msg: 'Bad Request'})
-    }
-
-    const queryString = format(`UPDATE articles SET votes = votes + %L WHERE article_id = %L RETURNING *`,
+exports.updateArticle = (params, updateBody) => {
+    let queryString = ''
+    if (updateBody.inc_votes){
+        queryString = format(`UPDATE articles SET votes = votes + %L WHERE article_id = %L RETURNING *`,
                                 updateBody.inc_votes,
-                                articleId.article_id
-                                )
-                                
+                                params.article_id)
+    }else{
+        queryString = format(`SELECT * FROM articles WHERE article_id = %L`,
+                                params.article_id)
+    }
     return db.query(queryString)
     .then((result) => {
-        if (result.rows.length === 0){
-            return Promise.reject({status: 404, msg: "Not Found"})
-        }
-        return result.rows[0]
-    })
-    .catch((err) => {
-        return Promise.reject(err)
+        if(result.rows[0] === undefined){
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        } 
+        return result.rows
     })
 }
