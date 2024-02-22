@@ -40,7 +40,6 @@ exports.insertComment = (comment, article_id) => {
     )
     return db.query(queryString)
     .then((result) => {
-        console.log(result);
         return convertTimestampToDate(result.rows[0])
     })
 }
