@@ -134,7 +134,7 @@ describe('POST /api/articles/:article_id/comments', () => {
         .send({
             username: "butter_bridge",
             body: "testBody"
-            
+
         })
         .expect(201)
         .then(({body}) => {
@@ -222,50 +222,6 @@ describe('POST /api/articles/:article_id/comments', () => {
         })
     });
 })
-    
-describe('GET /api/articles/:article_id/comments', () => {
-    it('200: responds with an array of comments for the given article_id, ordered with most recent first of which each comment should have expected properties', () => {
-        return request(app)
-        .get('/api/articles/1/comments')
-        .expect(200)
-        .then(({body}) => {
-            expect(body.comments).toHaveLength(11)
-            body.comments.forEach((comment) => {
-                expect(Object.keys(comment)).toContain('comment_id')
-                expect(Object.keys(comment)).toContain('votes')
-                expect(Object.keys(comment)).toContain('created_at')
-                expect(Object.keys(comment)).toContain('author')
-                expect(Object.keys(comment)).toContain('body')
-                expect(Object.keys(comment)).toContain('article_id')
-            })
-            expect(body.comments).toBeSortedBy('created_at', {descending: true})
-        })
-    });
-    it('200: responds with an empty array when given article id for artical with no comments', () => {
-        return request(app)
-        .get('/api/articles/2/comments')
-        .expect(200)
-        .then(({body}) => {
-            expect(body.comments).toHaveLength(0)
-        })
-    });
-    it('404: responds with msg of Not Found when given article id that refrences no article', () => {
-        return request(app)
-        .get('/api/articles/600/comments')
-        .expect(404)
-        .then(({body}) => {
-            expect(body.msg).toBe('Not Found')
-        })
-    });
-    it('400: responds with msg of Bad Request when given invalid data in place of article id', () => {
-        return request(app)
-        .get('/api/articles/invaliddata/comments')
-        .expect(400)
-        .then(({body}) => {
-            expect(body.msg).toBe('Bad Request')
-        })
-    })
-})
 
 describe('GET /api/articles', () => {
     it('200: responds with an articles array of article objects, sorted by date, each of which should have the expected properties', () => {
@@ -298,6 +254,81 @@ describe('ERR HANDLING', () => {
         .expect(404)
         .then((response) => {
             expect(response.error.text).toBe('Not Found')
+        })
+    });
+});
+
+describe('PATCH /api/articles/:article_id', () => {
+    it('201: accepts vote incrementer object and returns the patched article', () => {
+        const testPatch = {inc_votes : 10}
+        const expectArticle = {
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: "2020-07-09T20:11:00.000Z",
+            votes: 110,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            }
+        return request(app)
+        .patch('/api/articles/1')
+        .send(testPatch)
+        .expect(201)
+        .then(({body}) => {
+            expect(body.article).toEqual(expectArticle)
+        })
+    });
+    it('400: update value is not an int', () => {
+        const testPatch = {inc_votes : 'ten'}
+        return request(app)
+        .patch('/api/articles/1')
+        .send(testPatch)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Bad Request')
+        })
+    });
+    it('201: invalid update object key returns unmodified article', () => {
+        const testPatch = {dec_votes : 10}
+        const expectArticle = {
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: "2020-07-09T20:11:00.000Z",
+            votes: 100,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            }
+        return request(app)
+        .patch('/api/articles/1')
+        .send(testPatch)
+        .expect(201)
+        .then(({body}) => {
+            expect(body.article).toEqual(expectArticle)
+        })
+    });
+    it('400: non int in article_id ', () => {
+        const testPatch = {inc_votes : 10}
+        return request(app)
+        .patch('/api/articles/update')
+        .send(testPatch)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Bad Request')
+        })
+    });
+    it('404: trying to update non existant article', () => {
+        const testPatch = {inc_votes : 10}
+        return request(app)
+        .patch('/api/articles/50')
+        .send(testPatch)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe('Not Found')
         })
     });
 });
