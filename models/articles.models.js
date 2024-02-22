@@ -13,15 +13,22 @@ exports.selectArticleById = (id) => {
     })
 }
 
-exports.selectArticles = ({topic}) => {
-    
+exports.selectArticles = ({topic}, topics) => {
+    const realTopic = []
     let topicString = ''
     if(topic){
-        if(topic !== 'paper' && topic !== 'mitch' && topic !== 'cats' && topic !== 'undefined'){
+        topics.forEach(({slug}) => {
+            if( slug === topic ){
+                realTopic.push(slug)
+            }
+        })
+        if(realTopic[0] !== undefined){
+            topicString = 'WHERE articles.topic = %L'
+        }else{
             return Promise.reject({status: 404, msg : 'Not Found'})
         }
-        topicString = 'WHERE articles.topic = %L'
     }
+    
     const queryString = format(`SELECT articles.author, 
                                 title,
                                 articles.article_id, 
@@ -36,9 +43,10 @@ exports.selectArticles = ({topic}) => {
                                 ${topicString}
                                 GROUP BY articles.article_id
                                 ORDER BY articles.created_at DESC`,
-                                topic)
+                                realTopic[0])
     return db.query(queryString)
     .then(({rows}) => {
+        
         return rows
     })
 }
