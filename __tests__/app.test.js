@@ -390,7 +390,7 @@ describe('GET /api/articles?topic', () => {
         return request(app)
         .get('/api/articles?topic=invalid')
         .expect(404)
-        .then(({body}) => {
+        .then(( {body} ) => {
             expect(body.msg).toBe("Not Found")
         })
     });
