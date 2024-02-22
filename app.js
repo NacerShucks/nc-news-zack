@@ -6,6 +6,7 @@ const { getEndpoints } = require('./controllers/endpoints.controller')
 const { getArticles, getArticleById, patchArticleById } = require('./controllers/articles.controller')
 const { getCommentsByArticleId, deleteComments } = require('./controllers/comments.controller')
 const { postComment } = require('./controllers/comments.controller')
+const { getUsers } = require('./controllers/users.controller')
 
 app.use(express.json())
 
@@ -18,6 +19,8 @@ app.get('/api/articles/:article_id/comments', getCommentsByArticleId)
 app.get('/api/articles/', getArticles)
 
 app.get('/api/articles/:article_id', getArticleById)
+
+app.get('/api/users', getUsers)
 
 app.post('/api/articles/:article_id/comments', postComment)
 
