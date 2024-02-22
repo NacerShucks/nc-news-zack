@@ -4,6 +4,7 @@ const db = require('../db/connection.js')
 const data = require('../db/data/test-data/index.js')
 const seed = require('../db/seeds/seed.js')
 const endpoints = require('../endpoints.json')
+const {convertTimestampToDate} = require('../db/seeds/utils.js')
 
 beforeEach(() => {
     return seed(data)
@@ -119,10 +120,109 @@ describe('GET /api/articles/:article_id/comments', () => {
         .expect(400)
         .then(({body}) => {
             expect(body.msg).toBe('Bad Request')
+
         })
     });
 });
 
+describe('POST /api/articles/:article_id/comments', () => {
+    it('201: responds with the posted comment when given valid request body', () => {
+        const before = Date.now()
+
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+            body: "testBody"
+            
+        })
+        .expect(201)
+        .then(({body}) => {
+            const after = Date.now()
+            expect(Date.parse(body.comment.created_at)).toBeGreaterThan(before)
+            expect(Date.parse(body.comment.created_at)).toBeLessThan(after)
+            expect(body.comment).toEqual({
+                body: 'testBody',
+                votes: 0,
+                author: 'butter_bridge',
+                article_id: 2,
+                created_at: body.comment.created_at
+            })
+            
+        })
+    });
+    it('201: when given extra fields responds with posted comment with extra feilds removed', () => {
+        const before = Date.now()
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+            body: "testBody",
+            complements: "wow what a well made back end"
+        })
+        .expect(201)
+        .then(({body}) => {
+            const after = Date.now()
+            expect(Date.parse(body.comment.created_at)).toBeGreaterThan(before)
+            expect(Date.parse(body.comment.created_at)).toBeLessThan(after)
+            expect(body.comment).toEqual({
+                body: 'testBody',
+                votes: 0,
+                author: 'butter_bridge',
+                article_id: 2,
+                created_at: body.comment.created_at
+            })
+        })
+    });
+    it('400: responds with Bad Request when provided too few fields', () => {
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toEqual('Bad Request')
+        })
+    });
+    it('400: responds with Bad Request when one field has wrong name', () => {
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+            bodyodyody: "testBody"
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toEqual('Bad Request')
+        })
+    });
+    it('400: responds with Bad Request when field has wrong value type', () => {
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send({
+            username: "butter_bridge",
+            body: []
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toEqual('Bad Request')
+        })
+    })
+    it('404: responds with Not Found when passed an article id that refrences no article', () => {
+        return request(app)
+        .post('/api/articles/500/comments')
+        .send({
+            username: "butter_bridge",
+            body: "testBody"
+        })
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toEqual('Not Found')
+        })
+    });
+})
+    
 describe('GET /api/articles/:article_id/comments', () => {
     it('200: responds with an array of comments for the given article_id, ordered with most recent first of which each comment should have expected properties', () => {
         return request(app)
