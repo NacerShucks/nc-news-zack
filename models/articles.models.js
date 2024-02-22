@@ -45,7 +45,7 @@ exports.selectArticles = ({topic, sort_by = 'created_at', order = 'desc'}, topic
     if(!order === "desc" || !order === "asc"){
         return Promise.reject({status: 400, msg: "Invalid query"});
     }
-    console.log(articalKeys);
+
     let sortByValidater = 0
     articalKeys.forEach((key) => {
     
@@ -71,7 +71,6 @@ exports.selectArticles = ({topic, sort_by = 'created_at', order = 'desc'}, topic
                                 GROUP BY articles.article_id
                                 ORDER BY ${sort_by} ${order}`,
                                 realTopic[0])
-    console.log(queryString);
     return db.query(queryString)
     .then(({rows}) => {
         return rows
