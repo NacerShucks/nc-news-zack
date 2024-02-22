@@ -12,10 +12,12 @@ exports.getArticles = (req, res, next) => {
 
 
 exports.getArticleById = (req, res, next) => {
-    const {article_id} = req.params
-    selectArticleById(article_id)
+    selectArticleById(req.params)
     .then((article) => {
-        res.status(200).send({article})
+        if(article.length === 0){
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        } 
+        res.status(200).send({article: article[0]})
     })
     .catch((err) => {
         next(err)
@@ -23,9 +25,13 @@ exports.getArticleById = (req, res, next) => {
 }
 
 exports.patchArticleById = (req, res, next) => {
-    updateArticle(req.params, req.body).then((article) => {
-        res.status(201).send({article})
-    }).catch((err) => {
+
+    updateArticle(req.params, req.body)
+    .then((article) => {
+        
+        res.status(201).send({article: article[0]})
+    })
+    .catch((err) => {
         next(err)
     })
 

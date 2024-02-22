@@ -2,13 +2,11 @@ const db = require('../db/connection.js')
 const format = require('pg-format')
 
 exports.selectArticleById = (id) => {
-    const queryString = `SELECT * FROM articles WHERE article_id=$1`
-    return db.query(queryString, [id])
+    const articleId = Number(id.article_id)
+    const queryString = 'SELECT * FROM articles WHERE article_id=$1'
+    return db.query(queryString, [articleId])
     .then(({rows}) => {
-        if(rows.length === 0){
-            return Promise.reject({status: 404, msg: 'Not Found'})
-        }
-        return rows[0]
+        return rows
     })
 }
 
@@ -41,24 +39,21 @@ exports.selectArticles = ({topic}) => {
     })
 }
 
-exports.updateArticle = (articleId, updateBody) => {
-    if(typeof updateBody.inc_votes !== 'number' || !Object.keys(updateBody).includes('inc_votes')){
-        return Promise.reject({status: 400, msg: 'Bad Request'})
-    }
-
-    const queryString = format(`UPDATE articles SET votes = votes + %L WHERE article_id = %L RETURNING *`,
+exports.updateArticle = (params, updateBody) => {
+    let queryString = ''
+    if (updateBody.inc_votes){
+        queryString = format(`UPDATE articles SET votes = votes + %L WHERE article_id = %L RETURNING *`,
                                 updateBody.inc_votes,
-                                articleId.article_id
-                                )
-                                
+                                params.article_id)
+    }else{
+        queryString = format(`SELECT * FROM articles WHERE article_id = %L`,
+                                params.article_id)
+    }
     return db.query(queryString)
     .then((result) => {
-        if (result.rows.length === 0){
-            return Promise.reject({status: 404, msg: "Not Found"})
-        }
-        return result.rows[0]
-    })
-    .catch((err) => {
-        return Promise.reject(err)
+        if(result.rows[0] === undefined){
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        } 
+        return result.rows
     })
 }
