@@ -34,7 +34,7 @@ exports.selectArticles = ({topic}) => {
                                 topic)
     return db.query(queryString)
     .then(({rows}) => {
-        if(rows.length === 0){
+        if(rows[0] === undefined){
             return Promise.reject({status: 404, msg: "Not Found"})
         }
         return rows
