@@ -31,15 +31,19 @@ exports.selectArticles = () => {
 }
 
 exports.updateArticle = (params, updateBody) => {
-    const articleId = Number(params.article_id)
-    if(typeof updateBody.inc_votes !== 'number' || !Object.keys(updateBody).includes('inc_votes') || typeof articleId !== 'number' ){
-        return Promise.reject({status: 400, msg: 'Bad Request'})
-    }
-    const queryString = format(`UPDATE articles SET votes = votes + %L WHERE article_id = %L RETURNING *`,
+    let queryString = ''
+    if (updateBody.inc_votes){
+        queryString = format(`UPDATE articles SET votes = votes + %L WHERE article_id = %L RETURNING *`,
                                 updateBody.inc_votes,
                                 params.article_id)
+    }else{
+        console.log(params);
+        queryString = format(`SELECT * FROM articles WHERE article_id = %L`,
+                                params.article_id)
+    }
     return db.query(queryString)
     .then((result) => {
+        console.log(result);
         return result.rows
     })
 }

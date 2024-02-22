@@ -26,14 +26,16 @@ exports.getArticleById = (req, res, next) => {
 
 exports.patchArticleById = (req, res, next) => {
 
-    Promise.all([updateArticle(req.params, req.body), selectArticleById(req.params)])
-    .then((promises) => {
-        if(promises[0].length === 0){
+    updateArticle(req.params, req.body)
+    .then((article) => {
+        console.log(article);
+        if(article[0] === undefined){
             return Promise.reject({status: 404, msg : 'Not Found'})
         } 
-        res.status(201).send({article: promises[0][0]})
+        res.status(201).send({article: article[0]})
     })
     .catch((err) => {
+        console.log(err);
         next(err)
     })
 
