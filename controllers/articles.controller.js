@@ -28,14 +28,12 @@ exports.patchArticleById = (req, res, next) => {
 
     updateArticle(req.params, req.body)
     .then((article) => {
-        console.log(article);
         if(article[0] === undefined){
             return Promise.reject({status: 404, msg : 'Not Found'})
         } 
         res.status(201).send({article: article[0]})
     })
     .catch((err) => {
-        console.log(err);
         next(err)
     })
 

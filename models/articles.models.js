@@ -37,13 +37,11 @@ exports.updateArticle = (params, updateBody) => {
                                 updateBody.inc_votes,
                                 params.article_id)
     }else{
-        console.log(params);
         queryString = format(`SELECT * FROM articles WHERE article_id = %L`,
                                 params.article_id)
     }
     return db.query(queryString)
     .then((result) => {
-        console.log(result);
         return result.rows
     })
 }
