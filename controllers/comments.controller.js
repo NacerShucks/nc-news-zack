@@ -15,11 +15,11 @@ exports.postComment = (req, res, next) => {
 
 
 exports.getCommentsByArticleId = (req, res, next) => {
-
-    const {article_id} = req.params  
-
-    Promise.all([requestComments(article_id), selectArticleById(article_id)])
+    Promise.all([requestComments(req.params), selectArticleById(req.params)])
     .then((promiseResolutions) => {
+        if(promiseResolutions[1].length === 0){
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        }
         res.status(200).send({comments: promiseResolutions[0]})
     })
     .catch((err) => {
