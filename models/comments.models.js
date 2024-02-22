@@ -2,12 +2,12 @@ const db = require('../db/connection.js')
 const format = require('pg-format');
 const { convertTimestampToDate } = require('../db/seeds/utils.js');
 
-exports.requestComments = (articleID) => {
+exports.requestComments = (params) => {
     const queryString = format(
         `SELECT * 
         FROM comments 
         WHERE comments.article_id = %L
-        ORDER BY created_at DESC`, articleID)
+        ORDER BY created_at DESC`, params.article_id)
     return db.query(queryString)
     .then((result) => {
         return result.rows
@@ -42,13 +42,6 @@ exports.insertComment = (comment, article_id) => {
     .then((result) => {
         return convertTimestampToDate(result.rows[0])
     })
-    .catch((err) => {
-        if(err.code === '23503'){
-            return Promise.reject({status: 404, msg: "Not Found"});
-        }
-        return Promise.reject({status: 400, msg: "Bad Request"});
-    })
-    
 }
 
 exports.removeComments = (params) => {
