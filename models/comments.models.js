@@ -42,11 +42,4 @@ exports.insertComment = (comment, article_id) => {
     .then((result) => {
         return convertTimestampToDate(result.rows[0])
     })
-    .catch((err) => {
-        if(err.code === '23503'){
-            return Promise.reject({status: 404, msg: "Not Found"});
-        }
-        return Promise.reject({status: 400, msg: "Bad Request"});
-    })
-    
 }

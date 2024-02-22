@@ -8,7 +8,9 @@ exports.postComment = (req, res, next) => {
     .then((comment) => {
         res.status(201).send({comment})
     })
-    .catch(next)
+    .catch((err) => {
+        next(err)
+    })
 }
 
 
