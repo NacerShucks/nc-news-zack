@@ -6,13 +6,20 @@ exports.selectArticleById = (id) => {
     const queryString = 'SELECT * FROM articles WHERE article_id=$1'
     return db.query(queryString, [articleId])
     .then(({rows}) => {
+        if(rows[0] === undefined){
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        } 
         return rows
     })
 }
 
 exports.selectArticles = ({topic}) => {
+    
     let topicString = ''
     if(topic){
+        if(topic !== 'paper' && topic !== 'mitch' && topic !== 'cats' && topic !== 'undefined'){
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        }
         topicString = 'WHERE articles.topic = %L'
     }
     const queryString = format(`SELECT articles.author, 
@@ -32,9 +39,6 @@ exports.selectArticles = ({topic}) => {
                                 topic)
     return db.query(queryString)
     .then(({rows}) => {
-        if(rows[0] === undefined){
-            return Promise.reject({status: 404, msg: "Not Found"})
-        }
         return rows
     })
 }

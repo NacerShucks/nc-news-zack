@@ -394,5 +394,13 @@ describe('GET /api/articles?topic', () => {
             expect(body.msg).toBe("Not Found")
         })
     });
+    it('200: when queried with valid topic relating to no articles return empty array', () => {
+        return request(app)
+        .get('/api/articles?topic=paper')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toEqual([])
+        });
+    });
 });
 
