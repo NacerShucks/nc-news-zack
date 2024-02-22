@@ -42,6 +42,9 @@ exports.updateArticle = (params, updateBody) => {
     }
     return db.query(queryString)
     .then((result) => {
+        if(result.rows[0] === undefined){
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        } 
         return result.rows
     })
 }
