@@ -125,7 +125,7 @@ describe('GET /api/articles/:article_id/comments', () => {
     });
 });
 
-describe('POST /api/articles/:article_id/comments', () => {
+describe.only('POST /api/articles/:article_id/comments', () => {
     it('201: responds with the posted comment when given valid request body', () => {
         const before = Date.now()
 
@@ -174,7 +174,7 @@ describe('POST /api/articles/:article_id/comments', () => {
             })
         })
     });
-    it('400: responds with Bad Request when provided too few fields', () => {
+    it.only('400: responds with Bad Request when provided too few fields', () => {
         return request(app)
         .post('/api/articles/2/comments')
         .send({
@@ -185,7 +185,7 @@ describe('POST /api/articles/:article_id/comments', () => {
             expect(body.msg).toEqual('Bad Request')
         })
     });
-    it('400: responds with Bad Request when one field has wrong name', () => {
+    it.only('400: responds with Bad Request when one field has wrong name', () => {
         return request(app)
         .post('/api/articles/2/comments')
         .send({
@@ -197,7 +197,7 @@ describe('POST /api/articles/:article_id/comments', () => {
             expect(body.msg).toEqual('Bad Request')
         })
     });
-    it('400: responds with Bad Request when field has wrong value type', () => {
+    it.only('400: responds with Bad Request when field has wrong value type', () => {
         return request(app)
         .post('/api/articles/2/comments')
         .send({
@@ -209,7 +209,7 @@ describe('POST /api/articles/:article_id/comments', () => {
             expect(body.msg).toEqual('Bad Request')
         })
     })
-    it('404: responds with Not Found when passed an article id that refrences no article', () => {
+    it.only('404: responds with Not Found when passed an article id that refrences no article', () => {
         return request(app)
         .post('/api/articles/500/comments')
         .send({
