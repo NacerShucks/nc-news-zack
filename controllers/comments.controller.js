@@ -26,7 +26,9 @@ exports.getCommentsByArticleId = (req, res, next) => {
 }
 
 exports.deleteComments = (req, res, next) => {
-    removeComments(req.params).then(() => {
+    removeComments(req.params)
+    .then(() => {
         res.status(201).send()
-    }).catch(next)
+    })
+    .catch(next)
 }

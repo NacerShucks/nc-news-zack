@@ -56,11 +56,9 @@ exports.removeComments = (params) => {
         params.comment_id)
     return db.query(queryString)
     .then((result) => {
-        if(result.rows.length === 0){
+        if(result.rowCount === 0){
             return Promise.reject({status: 404, msg: 'Not found'})
         }
-    })
-    .catch((err) => {
-        return Promise.reject(err)
+        return result      
     })
 };
