@@ -2,9 +2,11 @@ const { selectArticleById, selectArticles, updateArticle } = require("../models/
 const { selectTopics } = require("../models/topics.models")
 
 exports.getArticles = (req, res, next) => {
-    selectTopics()
-    .then((topics) => {
-        selectArticles(req.query, topics)
+    Promise.all([selectArticleById({ article_id: 1}), selectTopics(req.query)])
+    .then((promiseResolutions) => {
+        const articleKeys = Object.keys(promiseResolutions[0][0])
+        const topics = promiseResolutions[1]
+        selectArticles(req.query, topics, articleKeys)
         .then((articles) => {
             res.status(200).send(articles)
         })
@@ -13,6 +15,7 @@ exports.getArticles = (req, res, next) => {
         })
     })
     
+
 } 
 
 
