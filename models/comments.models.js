@@ -43,3 +43,15 @@ exports.insertComment = (comment, article_id) => {
         return convertTimestampToDate(result.rows[0])
     })
 }
+
+exports.removeComments = (params) => {
+    const queryString = format('DELETE FROM comments WHERE comment_id = %L RETURNING *',
+        params.comment_id)
+    return db.query(queryString)
+    .then((result) => {
+        if(result.rowCount === 0){
+            return Promise.reject({status: 404, msg: 'Not found'})
+        }
+        return result      
+    })
+};

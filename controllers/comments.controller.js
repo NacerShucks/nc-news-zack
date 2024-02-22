@@ -1,5 +1,5 @@
 
-const { insertComment } = require("../models/comments.models")
+const { insertComment, removeComments } = require("../models/comments.models")
 const { selectArticleById } = require("../models/articles.models")
 const { requestComments } = require("../models/comments.models")
 
@@ -25,4 +25,12 @@ exports.getCommentsByArticleId = (req, res, next) => {
     .catch((err) => {
         next(err)
     })
+}
+
+exports.deleteComments = (req, res, next) => {
+    removeComments(req.params)
+    .then(() => {
+        res.status(201).send()
+    })
+    .catch(next)
 }
