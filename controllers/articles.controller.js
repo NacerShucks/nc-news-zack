@@ -6,7 +6,6 @@ exports.getArticles = (req, res, next) => {
     .then((topics) => {
         selectArticles(req.query, topics)
         .then((articles) => {
-            console.log(articles);
             res.status(200).send(articles)
         })
         .catch((err) => {
