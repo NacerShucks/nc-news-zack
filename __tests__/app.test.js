@@ -243,7 +243,7 @@ describe('GET /api/articles', () => {
                 expect(Object.keys(article)).not.toContain('body')               
             })
             expect(body).toBeSortedBy('created_at', {descending: true})
-            expect(body[0].comment_count).toBe("2")
+            expect(body[0].comment_count).toBe(2)
         })
     });
 });
@@ -404,3 +404,85 @@ describe('GET /api/articles?topic', () => {
     });
 });
 
+describe('GET /api/articles?sort_by&order', () => {
+    it('200: when queried with title returns articles sorted by title', () => {
+        return request(app)
+        .get('/api/articles?sort_by=title')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toBeSortedBy('title', {descending: true})
+        })
+    });
+    it('200: when queried with topic returns articles sorted by topic', () => {
+        return request(app)
+        .get('/api/articles?sort_by=topic')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toBeSortedBy('topic', {descending: true})
+        })
+    });
+    it('200: when queried with author returns articles sorted by author', () => {
+        return request(app)
+        .get('/api/articles?sort_by=author')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toBeSortedBy('author', {descending: true})
+        })
+    });
+    it('400: when queried with body returns err', () => {
+        return request(app)
+        .get('/api/articles?sort_by=body')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe('Invalid query')
+        })
+    });
+    it('200: when queried with created_at returns articles sorted by created_at', () => {
+        return request(app)
+        .get('/api/articles?sort_by=created_at')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toBeSortedBy('created_at', {descending: true})
+        })
+    });
+    it('200: when queried with votes returns articles sorted by votes', () => {
+        return request(app)
+        .get('/api/articles?sort_by=votes')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toBeSortedBy('votes', {descending: true})
+        })
+    });
+    it('200: when queried with article_img_url returns articles sorted by article_image_url', () => {
+        return request(app)
+        .get('/api/articles?sort_by=article_img_url')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toBeSortedBy('article_img_url', {descending: true})
+        })
+    });
+    it('200: when queried with comment_count returns articles sorted by comment_count', () => {
+        return request(app)
+        .get('/api/articles?sort_by=comment_count')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toBeSortedBy('comment_count', {descending: true})
+        })
+    });
+    it('200: when queried with title and asc returns articles sorted by title ascending', () => {
+        return request(app)
+        .get('/api/articles?sort_by=comment_count&order=asc')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toBeSortedBy('comment_count')
+        })
+    });
+    it('200: when queried with nothing returns articles sorted by created_at descending', () => {
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toBeSortedBy('created_at', {descending: true})
+        })
+    });
+});
