@@ -6,12 +6,30 @@ exports.selectArticleById = (id) => {
     const queryString = 'SELECT * FROM articles WHERE article_id=$1'
     return db.query(queryString, [articleId])
     .then(({rows}) => {
+        if(rows[0] === undefined){
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        } 
         return rows
     })
 }
 
-exports.selectArticles = () => {
-    const queryString = `SELECT articles.author, 
+exports.selectArticles = ({topic}, topics) => {
+    const realTopic = []
+    let topicString = ''
+    if(topic){
+        topics.forEach(({slug}) => {
+            if( slug === topic ){
+                realTopic.push(slug)
+            }
+        })
+        if(realTopic[0] !== undefined){
+            topicString = 'WHERE articles.topic = %L'
+        }else{
+            return Promise.reject({status: 404, msg : 'Not Found'})
+        }
+    }
+    
+    const queryString = format(`SELECT articles.author, 
                                 title,
                                 articles.article_id, 
                                 topic, 
@@ -19,13 +37,16 @@ exports.selectArticles = () => {
                                 articles.votes,
                                 article_img_url,
                                 COUNT(comments.article_id) AS comment_count
-                                FROM articles
+                                FROM articles                  
                                 LEFT JOIN comments 
                                 ON articles.article_id = comments.article_id 
+                                ${topicString}
                                 GROUP BY articles.article_id
-                                ORDER BY articles.created_at DESC`
+                                ORDER BY articles.created_at DESC`,
+                                realTopic[0])
     return db.query(queryString)
     .then(({rows}) => {
+        
         return rows
     })
 }
