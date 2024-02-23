@@ -486,3 +486,37 @@ describe('GET /api/articles?sort_by&order', () => {
         })
     });
 });
+
+describe('GET /api/users/:username', () => {
+    it('200: responds with a user object with correct properties', () => {
+        const expectUser = {
+            username: 'butter_bridge',
+            name: 'jonny',
+            avatar_url:
+              'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg'
+          }
+        return request(app)
+        .get(`/api/users/butter_bridge`)
+        .expect(200)
+        .then(({body}) => {
+
+            expect(body).toEqual(expectUser)
+        })
+    });
+    it('404: responds with a msg of Not Found when requesting a valid username that is not in db', () => {
+        return request(app)
+        .get(`/api/users/zack`)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe('Not Found')
+        })
+    });
+    it('404: responds with a msg of Not Found when attempting sql injection', () => {
+        return request(app)
+        .get(`/api/users/DROP TABLE IF EXISTS users`)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe('Not Found')
+        })
+    });
+});
